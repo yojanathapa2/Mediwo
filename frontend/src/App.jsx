@@ -15,6 +15,7 @@ import Home from './pages/Home';
 import Patients from './pages/Patients';
 import PatientDetail from './pages/PatientDetail';
 import Appointment from './pages/appointment';
+import ChatbotPage from './pages/ChatbotPage';
 import Navbar from './components/Navbar';
 
 
@@ -76,6 +77,7 @@ function AppRoutes() {
             </PrivateRoute>
           }
         />
+        <Route path="/chatbot" element={<ChatbotPage />} />
         <Route path="/" element={<Navigate to={user ? "/profile" : "/login"} />} />
       </Routes>
     </>
