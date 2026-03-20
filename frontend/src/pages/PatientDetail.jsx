@@ -1,11 +1,46 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { ArrowLeft, User, Calendar, Phone, Activity, Droplet, FileText, Clock } from 'lucide-react';
 
-import React, { useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { I } from "../icons/icons";
+const API_URL = process.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
-export default function PatientDetail() {
-  const { user, selPatient, setPage } = useAuth();
-  const [notes, setNotes] = useState("");
+const PatientDetail = () => {
+  const { patientId } = useParams();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [patient, setPatient] = useState(null);
+
+  useEffect(() => {
+    const fetchPatient = async () => {
+      try {
+        const response = await fetch(`${API_URL}/patients/${patientId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setPatient(data);
+        } else {
+          // Handle patient not found, e.g., redirect or show an error
+          navigate('/patients');
+        }
+      } catch (error) {
+        console.error('Failed to fetch patient details:', error);
+      }
+    };
+
+    if (user && user.role === 'DOCTOR') {
+      fetchPatient();
+    }
+  }, [user, patientId, navigate]);
+
+
+  const getStatusBadge = (status) => {
+    const styles = {
+      Active: 'bg-green-100 text-green-800',
+      Recovered: 'bg-blue-100 text-blue-800',
+      Critical: 'bg-red-100 text-red-800'
+    };
+    return styles[status] || 'bg-gray-100 text-gray-800';
+  };
 
   if (!user || user.role !== "doctor") {
     return (
@@ -49,20 +84,13 @@ export default function PatientDetail() {
     );
   }
 
-  const summary = {
-    chiefComplaint: selPatient.issue || "General consultation",
-    duration: "2–3 days",
-    severity: "Moderate",
-    allergies: "No known drug allergies",
-    history: "Previous intermittent symptoms, no major prior admissions reported.",
-    aiSummary:
-      "The patient reports symptoms relevant to the selected consultation. Structured intake suggests moderate urgency and likely need for physician review. Uploaded reports and history should be reviewed before final assessment.",
-  };
-
-  const reports = [
-    { id: 1, name: "Blood Test Report.pdf", type: "Lab Report", date: "2025-03-10", size: "1.2 MB" },
-    { id: 2, name: "ECG Report.pdf", type: "Cardiology", date: "2025-03-02", size: "0.8 MB" },
-  ];
+  if (!patient) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading patient details...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-[60px]" style={{ background: "#f7f9fc" }}>
@@ -210,31 +238,50 @@ export default function PatientDetail() {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <h3 className="font-bold text-slate-800 mb-4">Actions</h3>
-              <div className="space-y-3">
-                <button
-                  className="w-full text-left p-4 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-all"
-                >
-                  <p className="text-sm font-semibold text-slate-700">Mark Consultation Started</p>
-                  <p className="text-xs text-slate-400 mt-1">Update patient consultation status</p>
-                </button>
-
-                <button
-                  className="w-full text-left p-4 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-all"
-                >
-                  <p className="text-sm font-semibold text-slate-700">Call Next Patient</p>
-                  <p className="text-xs text-slate-400 mt-1">Move queue forward after this case</p>
-                </button>
-
-                <button
-                  onClick={() => setPage("patients")}
-                  className="w-full text-left p-4 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-all"
-                >
-                  <p className="text-sm font-semibold text-slate-700">Back to Patients</p>
-                  <p className="text-xs text-slate-400 mt-1">Return to patient list</p>
-                </button>
-              </div>
+        {/* Medications */}
+        {patient.medications && patient.medications.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <Activity className="w-6 h-6 text-blue-600" />
+              Current Medications
+            </h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Medication
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Dosage
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Frequency
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Start Date
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {patient.medications.map((med, index) => (
+                    <tr key={index} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {med.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrawrap text-sm text-gray-600">
+                        {med.dosage}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {med.frequency}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {new Date(med.startDate).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
 
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
@@ -259,4 +306,6 @@ export default function PatientDetail() {
       </div>
     </div>
   );
-}
+};
+
+export default PatientDetail;

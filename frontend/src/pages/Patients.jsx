@@ -1,56 +1,87 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { Search, User, Calendar, Activity, ArrowRight } from 'lucide-react';
 
-import React from "react";
-import { useAuth } from "../context/AuthContext";
-import { I } from "../icons/icons";
-import { MOCK_QUEUE } from "../data/mockData";
+const API_URL = process.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
-const PATIENTS = [
-  {
-    id: 1,
-    name: "Ram Prasad Khanal",
-    age: 51,
-    gender: "Male",
-    token: "A-012",
-    issue: "Chest discomfort and fatigue",
-    priority: "Medium",
-    lastVisit: "2025-03-03",
-  },
-  {
-    id: 2,
-    name: "Sunita Devi Shrestha",
-    age: 36,
-    gender: "Female",
-    token: "A-013",
-    issue: "Persistent headache",
-    priority: "Low",
-    lastVisit: "2025-02-15",
-  },
-  {
-    id: 3,
-    name: "Mohan Bahadur Thapa",
-    age: 63,
-    gender: "Male",
-    token: "A-014",
-    issue: "Knee pain and swelling",
-    priority: "Low",
-    lastVisit: "2025-01-29",
-  },
-  {
-    id: 4,
-    name: "Gita Kumari Rai",
-    age: 28,
-    gender: "Female",
-    token: "A-015",
-    issue: "Fever and sore throat",
-    priority: "Medium",
-    lastVisit: "2025-03-10",
-  },
-];
+const Patients = () => {
+  const { user } = useAuth();
+  const [patients, setPatients] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('name');
+  const [sortOrder, setSortOrder] = useState('asc');
 
-export default function Patients() {
-  const { user, setPage, setSelPatient } = useAuth();
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const response = await fetch(`${API_URL}/patients`);
+        if (response.ok) {
+          const data = await response.json();
+          setPatients(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch patients:', error);
+      }
+    };
 
-  if (!user || user.role !== "doctor") {
+    if (user && user.role === 'DOCTOR') {
+      fetchPatients();
+    }
+  }, [user]);
+
+  // Filter and sort patients
+  const filteredAndSortedPatients = useMemo(() => {
+    let filtered = patients.filter(patient =>
+      patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.condition.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    filtered.sort((a, b) => {
+      let aValue = a[sortBy];
+      let bValue = b[sortBy];
+
+      if (sortBy === 'admissionDate' || sortBy === 'lastVisit') {
+        aValue = new Date(aValue);
+        bValue = new Date(bValue);
+      } else if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+
+      if (sortOrder === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+
+    return filtered;
+  }, [searchTerm, sortBy, sortOrder, patients]);
+
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    const styles = {
+      Active: 'bg-green-100 text-green-800',
+      Recovered: 'bg-blue-100 text-blue-800',
+      Critical: 'bg-red-100 text-red-800'
+    };
+    return styles[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getPatientSlug = (name) => {
+    return name.toLowerCase().replace(/\s+/g, '-');
+  };
+
+  if (!user || user.role !== 'DOCTOR') {
     return (
       <div className="min-h-screen pt-[60px] flex items-center justify-center px-4">
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 text-center max-w-md">
@@ -72,14 +103,61 @@ export default function Patients() {
   }
 
   return (
-    <div className="min-h-screen pt-[60px]" style={{ background: "#f7f9fc" }}>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        <div className="mb-7 flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800 mb-1">Patients</h1>
-            <p className="text-slate-400 text-sm">
-              Review queue, open details, and continue consultations
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Patient Management</h1>
+          <p className="text-gray-600">View and manage all patient records</p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-xl p-6 shadow-md">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Total Patients</p>
+                <p className="text-3xl font-bold text-gray-900">{patients.length}</p>
+              </div>
+              <User className="w-10 h-10 text-blue-600" />
+            </div>
+          </div>
+          <div className="bg-white rounded-xl p-6 shadow-md">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Active Cases</p>
+                <p className="text-3xl font-bold text-green-600">
+                  {patients.filter(p => p.status === 'Active').length}
+                </p>
+              </div>
+              <Activity className="w-10 h-10 text-green-600" />
+            </div>
+          </div>
+          <div className="bg-white rounded-xl p-6 shadow-md">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Recovered</p>
+                <p className="text-3xl font-bold text-blue-600">
+                  {patients.filter(p => p.status === 'Recovered').length}
+                </p>
+              </div>
+              <Calendar className="w-10 h-10 text-blue-600" />
+            </div>
+          </div>
+          <div className="bg-white rounded-xl p-6 shadow-md">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">This Month</p>
+                <p className="text-3xl font-bold text-purple-600">
+                  {patients.filter(p => {
+                    const date = new Date(p.admissionDate);
+                    const now = new Date();
+                    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+                  }).length}
+                </p>
+              </div>
+              <Calendar className="w-10 h-10 text-purple-600" />
+            </div>
           </div>
           <button
             onClick={() => setPage("doctor-dashboard")}
@@ -169,34 +247,56 @@ export default function Patients() {
                           : "bg-amber-50 text-amber-700"
                       }`}
                     >
-                      {q.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <h3 className="font-bold text-slate-800 mb-3">Doctor Actions</h3>
-              <div className="space-y-3">
-                <button
-                  onClick={() => setPage("doctor-profile")}
-                  className="w-full text-left p-4 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-all"
-                >
-                  <p className="text-sm font-semibold text-slate-700">Open Doctor Profile</p>
-                  <p className="text-xs text-slate-400 mt-1">View your account details</p>
-                </button>
-
-                <button
-                  onClick={() => setPage("doctor-dashboard")}
-                  className="w-full text-left p-4 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-all"
-                >
-                  <p className="text-sm font-semibold text-slate-700">Return to Dashboard</p>
-                  <p className="text-xs text-slate-400 mt-1">Back to overview and queue</p>
-                </button>
-              </div>
-            </div>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Link
+                          to={`/patient/${patient.id}`}
+                          className="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-2"
+                        >
+                          {patient.name}
+                          <ArrowRight className="w-4 h-4" />
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {patient.age}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {patient.gender}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                          {patient.condition}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {patient.bloodGroup}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadge(patient.status)}`}>
+                          {patient.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {new Date(patient.admissionDate).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <Link
+                          to={`/patient/${patient.id}`}
+                          className="text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          View Details
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
+        </div>
+
+        {/* Results count */}
+        <div className="mt-4 text-sm text-gray-600">
+          Showing {filteredAndSortedPatients.length} of {patients.length} patients
         </div>
       </div>
     </div>

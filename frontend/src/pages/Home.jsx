@@ -1,3 +1,8 @@
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { Clock, FileText, Calendar, Stethoscope, ShieldCheck, Zap, MessageSquare, Brain, Heart, User } from 'lucide-react';
+import Navbar from '../components/Navbar';
 
 import React from "react";
 import { useAuth } from "../context/AuthContext";
@@ -8,69 +13,58 @@ export default function Home() {
 
   const features = [
     {
-      icon: "🏥",
-      title: "Hospital Booking",
-      desc: "Browse government and private hospitals, check availability, and book in seconds.",
-      action: () => setPage("hospitals"),
-      cta: "Browse Hospitals",
-      color: "#1a3f6f",
-      lightBg: "#eaf0f8",
+      icon: <FileText className="w-8 h-8 text-blue-600" />,
+      title: 'Unified Health Portfolio (EII)',
+      description: 'Instantly upload and securely store all scattered medical documents (reports, prescriptions, scans) to create a single, comprehensive digital record accessible 24/7.',
     },
     {
-      icon: "🩺",
-      title: "Doctor Appointments",
-      desc: "Choose your specialist, pick a convenient time slot, and get a confirmed booking.",
-      action: () => setPage("hospitals"),
-      cta: "Book a Doctor",
-      color: "#1a6e3c",
-      lightBg: "#e8f5ee",
+      icon: <Calendar className="w-8 h-8 text-indigo-600" />,
+      title: 'Digital Queue Management',
+      description: 'Secure your spot instantly, generate your digital token number, and track your live queue status and estimated wait time directly from your phone.',
+      highlight: true // Primary patient benefit feature
     },
     {
-      icon: "📋",
-      title: "Medical Report Upload",
-      desc: "Securely upload lab reports, X-rays, and health documents from your profile.",
-      action: () => (user ? setPage("profile") : setPage("login")),
-      cta: "Upload Reports",
-      color: "#0e6b88",
-      lightBg: "#e4f3f8",
+      icon: <MessageSquare className="w-8 h-8 text-green-600" />,
+      title: 'Adaptive AI Intake (Pre-Consultation)',
+      description: 'While you wait, interact with an intelligent, dynamic questionnaire that gathers structured symptoms and history, saving valuable consultation time.',
+    },
+
+    {
+      icon: <Brain className="w-8 h-8 text-red-600" />,
+      title: 'Intelligent Clinical Summary',
+      description: 'The AI synthesizes your current symptoms with critical historical data (allergies, failed treatments) into a concise, physician-ready report, reducing diagnostic error risk.',
+      highlight: true // Primary doctor benefit feature
     },
     {
-      icon: "🎫",
-      title: "Live Queue Status",
-      desc: "Track your token number and estimated wait time in real-time from anywhere.",
-      action: () => (user ? setPage("profile") : setPage("login")),
-      cta: "Check Queue",
-      color: "#7c3d8f",
-      lightBg: "#f3eaf8",
+      icon: <Stethoscope className="w-8 h-8 text-purple-600" />,
+      title: 'AI-Assisted Documentation Co-Pilot',
+      description: 'Utilizes medical speech-to-text to draft structured SOAP notes automatically, drastically cutting down on post-consultation charting and administrative work.',
     },
+    {
+      icon: <Zap className="w-8 h-8 text-yellow-600" />,
+      title: 'Context-Aware Smart Autocomplete',
+      description: 'The system learns from doctor-patient interactions (RL) to provide highly accurate, context-relevant suggestions for medication, codes, and treatment plans.',
+    },
+    {
+      icon: <ShieldCheck className="w-8 h-8 text-gray-600" />,
+      title: 'Secure & Compliant Data Handling',
+      description: 'Ensures enterprise-grade security with end-to-end encryption, strict access control, and adherence to medical privacy standards (e.g., HIPAA feasibility).',
+    },
+    {
+      icon: <Clock className="w-8 h-8 text-pink-600" />,
+      title: 'Continuous System Improvement (RL)',
+      description: 'The platform self-improves by learning from doctor feedback (acceptance/modification of suggestions) ensuring smarter templates and higher accuracy over time.',
+    }
   ];
 
   return (
-    <div className="min-h-screen pt-[60px]" style={{ background: "#f7f9fc" }}>
-      <section
-        className="flex flex-col items-center justify-center text-center px-6 py-28 relative overflow-hidden"
-        style={{
-          minHeight: "88vh",
-          background: "linear-gradient(160deg,#eaf2fb 0%,#edf8f1 60%,#f7f9fc 100%)",
-        }}
-      >
-        <div
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage: "radial-gradient(circle, #b8d0e8 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
-          }}
-        ></div>
-
-        <div className="relative z-10 flex flex-col items-center">
-          <div
-            className="w-20 h-20 rounded-3xl flex items-center justify-center text-white text-4xl font-black shadow-2xl mb-8 select-none"
-            style={{
-              background: "linear-gradient(135deg,#1a3f6f 0%,#1a6e3c 100%)",
-              boxShadow: "0 20px 60px rgba(26,63,111,0.25)",
-            }}
-          >
-            M
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-indigo-50">
+      {!user && <Navbar />}
+      {/* Hero Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-16">
+          <div className="flex justify-center mb-6">
+            <Heart className="w-16 h-16 text-blue-600" />
           </div>
 
           <h1
@@ -89,8 +83,8 @@ export default function Home() {
             Connecting patients to healthcare — seamlessly, securely, and with dignity.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 mt-10">
-            {user ? (
+          {user ? (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <button
                 onClick={() => setPage("hospitals")}
                 className="flex items-center gap-2 px-8 py-3.5 text-white font-semibold rounded-2xl text-sm hover:opacity-90 transition-all shadow-lg shadow-blue-200"
@@ -149,17 +143,43 @@ export default function Home() {
           <p className="text-slate-400 text-sm">Click any feature to get started</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {features.map((f) => (
-            <button
-              key={f.title}
-              onClick={f.action}
-              className="group text-left p-6 rounded-2xl border border-slate-100 bg-white hover:shadow-xl hover:border-slate-200 transition-all duration-200 hover:-translate-y-0.5"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-                  style={{ background: f.lightBg }}
+        {/* User Type Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {/* Patient Card */}
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition duration-200">
+            <div className="h-48 bg-linear-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+              <User className="w-24 h-24 text-white opacity-90" />
+            </div>
+            <div className="p-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">For Patients</h3>
+              <p className="text-gray-600 mb-4">
+                Upload and manage your medical records, track your health history, and share documents with your healthcare providers.
+              </p>
+              {!user && (
+                <Link
+                  to="/register"
+                  className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+                >
+                  Register as Patient
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {/* Doctor Card */}
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition duration-200">
+            <div className="h-48 bg-linear-to-br from-green-400 to-green-600 flex items-center justify-center">
+              <Stethoscope className="w-24 h-24 text-white opacity-90" />
+            </div>
+            <div className="p-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">For Doctors</h3>
+              <p className="text-gray-600 mb-4">
+                Access patient records, review medical documents, and provide comprehensive healthcare management for your patients.
+              </p>
+              {!user && (
+                <Link
+                  to="/register"
+                  className="inline-block px-6 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
                 >
                   {f.icon}
                 </div>
@@ -198,4 +218,6 @@ export default function Home() {
       </footer>
     </div>
   );
-}
+};
+
+export default Home;

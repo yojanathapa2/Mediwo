@@ -22,28 +22,45 @@ export default function Navbar() {
   const links = user?.role === "doctor" ? doctorLinks : patientLinks;
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-b border-slate-100 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-15" style={{ height: 60 }}>
-        <button onClick={() => setPage(user?.role === "doctor" ? "doctor-dashboard" : "home")} className="flex items-center gap-2.5">
-          <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-white font-black text-sm"
-            style={{ background: "linear-gradient(135deg,#1a3f6f,#1a6e3c)" }}
-          >
-            M
-          </div>
-          <span className="font-black text-base tracking-tight" style={{ color: "#1a3f6f", letterSpacing: "-0.03em" }}>
-            MEDIWO
-          </span>
-        </button>
+    <header className="bg-white shadow-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center py-4">
+          <Link to="/" className="text-2xl font-bold text-gray-800">
+            Home
+          </Link>
 
-        <div className="hidden md:flex items-center gap-0.5">
-          {links.map((l) => (
-            <button
-              key={l.id}
-              onClick={() => setPage(l.id)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                page === l.id ? "bg-blue-50 text-blue-700" : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
-              }`}
+          <nav className="flex items-center space-x-6">
+            {
+              user && (<>
+                {
+                  user?.role === 'PATIENT' ? (
+                    <>
+                <Link
+                  to="/appointment"
+                  className={`${isActive('/appointment')} transition`}
+                >
+                  Appointment
+                </Link> 
+                <Link
+                  to="/upload"
+                  className={`${isActive('/upload')} transition`}
+                >
+                  Upload
+                      </Link>
+                      </>
+              )
+                : (
+                  <Link
+                    to="/patients"
+                    className={`${isActive('/patients')} transition`}
+                  >
+                    Patients
+                  </Link>
+                )
+            }
+            <Link
+              to="/profile"
+              className={`${isActive('/profile')} transition`}
             >
               <l.icon />
               {l.label}

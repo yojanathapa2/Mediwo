@@ -3,6 +3,8 @@ import React, { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext(null);
 
+const API_URL = process.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -14,12 +16,67 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [page, setPage] = useState("home");
   const [user, setUser] = useState(null);
-  const [selHospital, setSelHospital] = useState(null);
-  const [bookingResult, setBookingResult] = useState(null);
-  const [selPatient, setSelPatient] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (payload) => {
-    setUser(payload);
+  useEffect(() => {
+    // Check if user is stored in localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+    setLoading(false);
+  }, []);
+
+  const login = async (username, password) => {
+    const response = await fetch(`${API_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (response.ok) {
+      const userData = await response.json();
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+      return true;
+    }
+    return false;
+  };
+
+  const register = async (userData) => {
+    const response = await fetch(`${API_URL}/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
+
+    if (response.ok) {
+      const newUser = await response.json();
+      setUser(newUser);
+      localStorage.setItem('user', JSON.stringify(newUser));
+      return true;
+    }
+    return false;
+  };
+
+  const updateUser = async (updatedData) => {
+    const response = await fetch(`${API_URL}/user`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedData),
+    });
+
+    if (response.ok) {
+      const updatedUser = await response.json();
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
   };
 
   const logout = () => {

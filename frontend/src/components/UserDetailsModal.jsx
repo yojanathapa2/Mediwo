@@ -1,37 +1,35 @@
 // import React, { useState, useEffect } from 'react';
 // import { useAuth } from '../context/AuthContext';
 
-// const UserDetailsModal = ({ isOpen, onClose }) => {
-//   const { user, updateUser } = useAuth();
-//   const [ formData, setFormData ] = useState({
-//     birthday: user?.birthday || '',
-//     sex: user?.sex || '',
-//     location: user?.location || '',
-//     religion: user?.religion || '',
-//     nationality: user?.nationality || '',
-//     address: user?.address || '',
-//     emergencyContact: user?.emergencyContact || '',
-//     bloodGroup: user?.bloodGroup || '',
-//     position: user?.position || '',
-//     hospitalName: user?.hospitalName || ''
-//   });
+const UserDetailsModal = ({ isOpen, onClose }) => {
+  const { user, updateUser } = useAuth();
+  const [ formData, setFormData ] = useState({
+    birthday: user?.birthday || '',
+    sex: user?.sex || '',
+    location: user?.location || '',
+    religion: user?.religion || '',
+    nationality: user?.nationality || '',
+    emergencyContact: user?.emergencyContact || '',
+    bloodGroup: user?.bloodGroup || '',
+    position: user?.position || '',
+    hospitalName: user?.hospitalName || ''
+  });
 
-//   useEffect(() => {
-//     if (user) {
-//       setFormData({
-//         birthday: user.birthday || '',
-//         sex: user.sex || '',
-//         location: user.location || '',
-//         religion: user.religion || '',
-//         nationality: user.nationality || '',
-//         address: user.address || '',
-//         emergencyContact: user.emergencyContact || '',
-//         bloodGroup: user.bloodGroup || '',
-//         position: user.position || '',
-//         hospitalName: user.hospitalName || ''
-//       });
-//     }
-//   }, [ user, isOpen ]);
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        birthday: user.birthday || '',
+        sex: user.sex || '',
+        location: user.location || '',
+        religion: user.religion || '',
+        nationality: user.nationality || '',
+        emergencyContact: user.emergencyContact || '',
+        bloodGroup: user.bloodGroup || '',
+        position: user.position || '',
+        hospitalName: user.hospitalName || ''
+      });
+    }
+  }, [ user, isOpen ]);
 
 //   const handleChange = (e) => {
 //     setFormData({
@@ -170,35 +168,20 @@
 //               </select>
 //             </div>
 
-//             <div className="md:col-span-2">
-//               <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
-//                 Address
-//               </label>
-//               <textarea
-//                 id="address"
-//                 name="address"
-//                 value={formData.address}
-//                 onChange={handleChange}
-//                 rows="3"
-//                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-//                 placeholder="Enter full address"
-//               />
-//             </div>
-
-//             <div className="md:col-span-2">
-//               <label htmlFor="emergencyContact" className="block text-sm font-medium text-gray-700 mb-2">
-//                 Emergency Contact
-//               </label>
-//               <input
-//                 id="emergencyContact"
-//                 name="emergencyContact"
-//                 type="tel"
-//                 value={formData.emergencyContact}
-//                 onChange={handleChange}
-//                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-//                 placeholder="Emergency contact number"
-//               />
-//             </div>
+            <div className="md:col-span-2">
+              <label htmlFor="emergencyContact" className="block text-sm font-medium text-gray-700 mb-2">
+                Emergency Contact
+              </label>
+              <input
+                id="emergencyContact"
+                name="emergencyContact"
+                type="tel"
+                value={formData.emergencyContact}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                placeholder="Emergency contact number"
+              />
+            </div>
 
 //             {/* Doctor-specific fields */}
 //             {user?.role === 'DOCTOR' && (
